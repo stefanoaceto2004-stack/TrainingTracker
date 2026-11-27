@@ -72,9 +72,9 @@ const ens=()=>{const p=act(),c=cur();if(p&&(!c||c.wk!=wk(today())))newCycle(p);e
 const filled=s=>s.ex.some(e=>e.sets.some(x=>x.kg!=null||x.reps!=null));
 const st=(s,c)=>{const f=filled(s)||s.ex.some(e=>e.done),old=c&&c!=cur();if(s.closed||old)return s.ex.length&&s.ex.every(e=>e.done)?'Completato':f?'Parziale':'Saltato';return f||s.ex.some(e=>e.skip)?'Da continuare':'Da iniziare'};
 const clr=s=>{s.closed=false;s.ex.forEach(e=>{e.done=e.skip=false;e.sets=mk(e)})};
-const calc=(e,t)=>t==null?null:Math.min(800,Math.max(e.load=='Zavorra'?0:2,Math.round(t*(1+e.pct/100))));
-const sug=(e,x)=>{const k=e.sets.indexOf(x),t=e.sets[0].kg;return k>0&&t!=null&&(e.method=='top'||e.pct)?calc(e,t):null};
-const eff=(e,x)=>{const t=e.sets[0].kg;return e.sets.indexOf(x)>0&&t!=null&&x.kg!=null?Math.round((x.kg/t-1)*100):null};
+const calc=(e,t)=>e.load!='Peso'||t==null?null:Math.min(800,Math.max(2,Math.round(t*(1+e.pct/100))));
+const sug=(e,x)=>{const k=e.sets.indexOf(x),t=e.sets[0].kg;return e.load=='Peso'&&k>0&&t!=null&&e.method=='top'?calc(e,t):null};
+const eff=(e,x)=>{const t=e.sets[0].kg;return e.load=='Peso'&&e.sets.indexOf(x)>0&&t!=null&&x.kg!=null?Math.round((x.kg/t-1)*100):null};
 const mv=(a,i,d)=>{const j=i+d;if(j>=0&&j<a.length)[a[i],a[j]]=[a[j],a[i]]};
 const setStr=e=>{const f=x=>fmt(x.kg)+'×'+(x.reps==null?'—':x.reps),g=t=>e.sets.filter(x=>x.t==t).map(f).join(' · ');return(e.method=='top'?'Top '+g('top')+' | Back-off '+g('back'):g('lin'))+(e.skip?' (saltato)':'')};
 function openS(c,s){V.cid=c.id;V.sid=s.id;V.back=V.tab=='trk'?V.back:V.tab;V.tab='trk';V.ov=0;if(!s.date&&!filled(s))s.date=today();save();R();scrollTo(0,0)}
@@ -111,7 +111,7 @@ fld('Gruppo muscolare',pick(e.group,e.group,()=>opt('Gruppo muscolare',GI,e.grou
 fld('Tipo di carico',pick(e.load,e.load,()=>opt('Tipo di carico',LI,e.load,v=>{e.load=v}))),
 fld('Metodo',pick(e.method,e.method=='top'?'Top Set + Back-off':'Lineare',()=>opt('Metodo',MI,e.method,v=>{e.method=v}))),
 fld('Numero di serie',pick(e.n+' serie',e.n+' serie',()=>opt('Numero di serie',NS,e.n,v=>{e.n=v||e.n}))),
-e.method=='top'&&fld('Target back-off',pick(pc(e.pct),pc(e.pct),()=>opt('Target back-off',PCT,e.pct,v=>{e.pct=v??e.pct}))),
+e.method=='top'&&e.load=='Peso'&&fld('Target back-off',pick(pc(e.pct),pc(e.pct),()=>opt('Target back-off',PCT,e.pct,v=>{e.pct=v??e.pct}))),
 h('div',{class:'r'},ib('up',()=>{mv(arr,i,-1);af()},' s'),ib('down',()=>{mv(arr,i,1);af()},' s'),h('div',{class:'sp'}),h('button',{class:'b s',onclick:()=>ask('Rimuovere l’esercizio?',()=>{arr.splice(i,1);af()})},'Rimuovi')))}
 const hd=(t,sub,l,...r)=>h('div',{class:'hd'},l,h('div',{class:'sp'},h('h1',{},t),h('div',{class:'mu'},sub)),...r);
 function home(){const c=cur(),p=c&&prv(c),s=c&&(c.sessions.find(x=>x.id==V.sel)||p||c.sessions[0]),t=s&&st(s);
@@ -182,7 +182,7 @@ const kgCell=(x,k)=>h('div',{class:'row',style:'gap:6px'},h('span',{class:'mu',s
 const blk=(t,l)=>{const a=e.sets.filter(x=>x.t==t);return a.length&&[h('div',{class:'mu',style:'padding:8px 0 2px'},l),a.map(kgCell)]};
 return h('div',{class:'c',id:'x'+e.id},h('div',{class:'r pad',style:'padding-bottom:2px'},h('h2',{class:'sp'},e.name),e.done&&h('span',{class:'p a'},'Confermato')),
 h('div',{class:'mu'},`${e.group} · ${e.n} serie · ${e.load}`),
-top?[blk('top','Top Set'),blk('back','Back-off '+pc(e.pct))]:h('div',{class:'col',style:'padding-top:2px'},e.sets.map(kgCell)),
+top?[blk('top','Top Set'),blk('back',e.load=='Peso'?'Back-off '+pc(e.pct):'Back-off')]:h('div',{class:'col',style:'padding-top:2px'},e.sets.map(kgCell)),
 h('div',{class:'r pad',style:'border-top:1px solid var(--ln);margin-top:6px'},h('button',{class:'b s',onclick:()=>{V.op[e.id]=!V.op[e.id];R()}},'Modifica'),h('div',{class:'sp'}),h('button',{class:'b s'+(e.done?' a':''),style:'min-width:120px',onclick:()=>{e.done=!e.done;save();R()}},e.done?'Riapri':'Conferma')),
 V.op[e.id]&&pnl(e,s.ex,i,af))}
 function trk(){const c=S.cycles.find(x=>x.id==V.cid),s=c&&c.sessions.find(x=>x.id==V.sid);if(!s){V.tab='home';return home()}
