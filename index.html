@@ -121,17 +121,17 @@ S.settings.timer&&timer(),
 !c&&h('div',{class:'c'},h('div',{class:'pad'},'Nessuna scheda attiva: creane o attivane una in Schede.')),
 s&&h('div',{class:'c'},h('div',{class:'r pad'},h('h2',{class:'sp'},s.name),pl(s,c)),s.ex.map(e=>h('div',{class:'row'},h('span',{class:'sp'},e.name),h('span',{class:'mu'},e.n+' serie'))),h('div',{class:'r pad',style:'border-top:1px solid var(--ln)'},h('button',{class:'b a sp',onclick:()=>openS(c,s)},t=='Da iniziare'?'Inizia':t=='Da continuare'?'Continua':'Modifica'),t=='Completato'&&h('button',{class:'b',onclick:()=>ask('Svuotare questo allenamento?',()=>{clr(s);save();R()})},'Svuota'))),
 c&&h('div',{class:'c'},h('h2',{},c.title),c.sessions.map(x=>h('button',{class:'row'+(x==s?' sel':''),onclick:()=>{V.sel=x.id;R()}},h('span',{class:'sp'},x.name),pl(x,c))),h('div',{class:'pad',style:'border-top:1px solid var(--ln)'},h('button',{class:'b s',onclick:()=>ask('Avviare un nuovo ciclo settimanale con la scheda attiva?',()=>{newCycle(act());V.sel=null;save();R()})},'Nuovo ciclo'))))}
-function wkg(t,val,cb){const ov=h('div',{class:'ov',onclick:e=>e.target==ov&&ov.remove()}),D=[{l:'—',v:null},{l:'00',v:0},{l:'25',v:1},{l:'50',v:2},{l:'75',v:3}],I=[{l:'—',v:null},...it(0,200)];
-const dv=val==null?null:val%4,iv=val==null?null:Math.floor(val/4);
-let sd=dv==null?0:D.findIndex(d=>d.v==dv),si=iv==null?0:iv+1;
-const mk=(items,sel)=>{const w=h('div',{class:'wh'},h('div',{class:'pd'}),items.map(i=>h('div',{class:'wi'},i.l)),h('div',{class:'pd'}));
-const g=()=>Math.max(0,Math.min(items.length-1,Math.round(w.scrollTop/40))),hl=n=>{[...w.children].forEach((c,k)=>c.classList.toggle('on',k-1==n))};
-w.addEventListener('scroll',()=>{const n=g();hl(n)});w._n=n=>{w.scrollTop=n*40;hl(n)};w._g=g;return w};
-const dw=mk(D,sd),iw=mk(I,si);
-iw.addEventListener('scroll',()=>{if(iw._g()==1&&dw._g()<2)dw._n(2)}); // intero 0 -> decimale minimo 0,50 (indice 2, dopo '—' e '00')
-ov.append(h('div',{class:'sh'},h('h2',{},t),h('div',{class:'ws'},h('div',{class:'band'}),iw,h('div',{class:'wi',style:'display:flex;align-items:center;justify-content:center;pointer-events:none'},','),dw),
-h('div',{class:'r'},h('button',{class:'b sp',onclick:()=>ov.remove()},'Annulla'),h('button',{class:'b a sp',onclick:()=>{ov.remove();const i=iw._g(),d=dw._g();if(i==0&&d==0){cb(null);return}let q=(I[i].v??0)*4+(D[d].v??0);q=Math.max(q,2);cb(q)}},'Conferma'))));
-document.body.append(ov);requestAnimationFrame(()=>{iw._n(si);dw._n(sd)})}
+function wkg(t,val,cb,load){
+const ov=h('div',{class:'ov',onclick:e=>e.target==ov&&ov.remove()}),D=[{l:'—',v:null},{l:'00',v:0},{l:'25',v:1},{l:'50',v:2},{l:'75',v:3}],I=[{l:'—',v:null},...it(0,200).map(v=>({l:String(v).padStart(2,'0'),v}))];
+let dv=val==null?null:val%4,iv=val==null?null:Math.floor(val/4),sd=dv==null?0:D.findIndex(d=>d.v==dv),si=iv==null?0:iv+1;
+const mk=items=>{const w=h('div',{class:'wh'},h('div',{class:'pd'}),items.map(i=>h('div',{class:'wi'},i.l)),h('div',{class:'pd'}));const g=()=>Math.max(0,Math.min(items.length-1,Math.round(w.scrollTop/40))),hl=n=>[...w.children].forEach((c,k)=>c.classList.toggle('on',k-1==n));w.addEventListener('scroll',()=>hl(g()));w._n=n=>{w.scrollTop=n*40;hl(n)};w._g=g;return w};
+const dw=mk(D),iw=mk(I);
+const sync=(src)=>{let ni=iw._g(),nd=dw._g();if(src=='i'){si=ni;if(si==0)nd=0;else if(si==1){if(load=='Peso')nd=3;else if(nd==0)nd=1;else if(nd==2||nd==4)nd=3}else if(nd==0)nd=1}else{sd=nd;if(sd>0&&ni==0)ni=1;if(ni==1){if(load=='Peso')nd=3;else if(nd!=1&&nd!=3)nd=3}else if(ni>1&&nd==0)nd=1;si=ni}if(si!=iw._g()){iw._n(si)}if(nd!=dw._g()){dw._n(nd)}si=iw._g();sd=dw._g()};
+iw.addEventListener('scroll',()=>sync('i'));
+dw.addEventListener('scroll',()=>sync('d'));
+ov.append(h('div',{class:'sh'},h('h2',{},t),h('div',{class:'ws'},h('div',{class:'band'}),iw,h('div',{class:'wi',style:'display:flex;align-items:center;justify-content:center;pointer-events:none'},','),dw),h('div',{class:'r'},h('button',{class:'b sp',onclick:()=>ov.remove()},'Annulla'),h('button',{class:'b a sp',onclick:()=>{ov.remove();const i=iw._g(),d=dw._g();if(i==0){cb(null);return}let q=I[i].v*4+(D[d].v??0);cb(Math.max(load=='Zavorra'?0:2,q))}},'Conferma'))));
+document.body.append(ov);requestAnimationFrame(()=>{iw._n(si);dw._n(sd)})
+}
 const edKg=(e,x)=>wkg('Carico (kg)',x.kg??sug(e,x),v=>{if(e.method=='lin')e.sets.forEach(s=>s.kg=v);else x.kg=v;save();R()},e.load);
 const edRp=(e,x)=>wheel('Ripetizioni',[{items:RP,val:x.reps}],v=>{x.reps=v[0];save();R()});
 function card(s,e,i){const af=()=>{rs(e);save();R()},top=e.method=='top';
