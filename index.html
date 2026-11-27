@@ -180,15 +180,21 @@ const edRp=(e,x)=>wheel('Ripetizioni',[{items:RP,val:x.reps}],v=>{x.reps=v[0];sa
 function card(s,e,i){const af=()=>{rs(e);save();R()},top=e.method=='top';
 const kgCell=(x,k)=>h('div',{class:'row',style:'gap:6px'},h('span',{class:'mu',style:'width:16px'},k+1),h('button',{class:'b o sp',onclick:()=>edKg(e,x)},h('b',{},fmt(x.kg)+' kg'),sug(e,x)!=null&&h('div',{class:'mu',style:'font-size:12px;font-weight:400'},'teor. '+fmt(sug(e,x))+(eff(e,x)==null?'':' · '+pc(eff(e,x))))),h('span',{class:'mu'},'×'),h('button',{class:'b o',style:'min-width:84px',onclick:()=>edRp(e,x)},x.reps??'—'));
 const blk=(t,l)=>{const a=e.sets.filter(x=>x.t==t);return a.length&&[h('div',{class:'mu',style:'padding:8px 0 2px'},l),a.map(kgCell)]};
-return h('div',{class:'c',id:'x'+e.id},h('div',{class:'r pad',style:'padding-bottom:2px'},h('h2',{class:'sp'},e.name),e.done&&h('span',{class:'p a'},'Confermato')),
+return h('div',{class:'c',id:'x'+e.id},
+h('div',{class:'r pad',style:'padding-bottom:2px'},
+h('h2',{class:'sp'},e.name),
+h('span',{class:'p'+(e.done?'':' a')},e.done?'Confermato':'Da confermare'),
+ib('pen',()=>{V.op[e.id]=!V.op[e.id];R()},' s')),
 h('div',{class:'mu'},`${e.group} · ${e.n} serie · ${e.load}`),
-top?[blk('top','Top Set'),blk('back',e.load=='Peso'?'Back-off '+pc(e.pct):'Back-off')]:h('div',{class:'col',style:'padding-top:2px'},e.sets.map(kgCell)),
-h('div',{class:'r pad',style:'border-top:1px solid var(--ln);margin-top:6px'},h('button',{class:'b s',onclick:()=>{V.op[e.id]=!V.op[e.id];R()}},'Modifica'),h('div',{class:'sp'}),h('button',{class:'b s'+(e.done?' a':''),style:'min-width:120px',onclick:()=>{e.done=!e.done;save();R()}},e.done?'Riapri':'Conferma')),
+top?[blk('top','Top Set'),blk('back','Back-off '+pc(e.pct))]:h('div',{class:'col',style:'padding-top:2px'},e.sets.map(kgCell)),
+h('div',{class:'pad',style:'border-top:1px solid var(--ln);margin-top:6px'},
+h('button',{class:'b s'+(e.done?'':' a'),style:'width:100%',onclick:()=>{e.done=!e.done;save();R()}},e.done?'Riapri':'Conferma')),
 V.op[e.id]&&pnl(e,s.ex,i,af))}
 function trk(){const c=S.cycles.find(x=>x.id==V.cid),s=c&&c.sessions.find(x=>x.id==V.sid);if(!s){V.tab='home';return home()}
 return h('main',{},hd(s.name,st(s),ib('back',()=>go(V.back)),h('input',{class:'in',type:'date',value:s.date||'',onchange:e=>{s.date=e.target.value||null;save()}})),
-h('div',{class:'r',style:'margin-bottom:12px'},h('button',{class:'b s',onclick:()=>{V.ov=!V.ov;R()}},`Esercizi ${s.ex.filter(e=>e.done||e.skip).length}/${s.ex.length}`)),
-V.ov&&h('div',{class:'c'},s.ex.map((e,i)=>h('button',{class:'row',onclick:()=>{V.ov=0;R();const n=document.getElementById('x'+e.id);n&&n.scrollIntoView()}},h('span',{class:'sp'},(i+1)+'. '+e.name),h('span',{class:'mu'},e.done?'Confermato':e.skip?'Saltato':'')))),
+S.settings.timer&&timer(),
+h('div',{class:'r',style:'margin-bottom:12px'},h('button',{class:'b s',onclick:()=>{V.ov=!V.ov;R()}},'Elenco esercizi')),
+V.ov&&h('div',{class:'c'},s.ex.map((e,i)=>h('button',{class:'row',onclick:()=>{V.ov=0;R();const n=document.getElementById('x'+e.id);n&&n.scrollIntoView()}},h('span',{class:'sp'},(i+1)+'. '+e.name),h('span',{class:'mu'},e.done?'Confermato':e.skip?'Saltato':'Da confermare')))),
 s.ex.map((e,i)=>card(s,e,i)),
 h('div',{class:'r'},h('button',{class:'b sp',onclick:()=>{const e=cpy(NE());s.ex.push(e);V.op[e.id]=1;save();R()}},'Aggiungi esercizio'),h('button',{class:'b a sp',onclick:()=>{s.closed=!s.closed;save();s.closed?go(V.back):R()}},s.closed?'Riapri':'Concludi')))}
 function sch(){const af=()=>{save();R()},p=V.plan&&S.plans.find(x=>x.id==V.plan);
