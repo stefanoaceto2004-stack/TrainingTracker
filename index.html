@@ -175,7 +175,7 @@ dw=mk(valid(iv),dv);
 ov.append(h('div',{class:'sh'},h('h2',{},t),h('div',{class:'ws'},h('div',{class:'band'}),iw,h('div',{class:'wi',style:'display:flex;align-items:center;justify-content:center;pointer-events:none'},','),dw),h('div',{class:'r'},h('button',{class:'b sp',onclick:()=>ov.remove()},'Annulla'),h('button',{class:'b a sp',onclick:()=>{const i=iw._get(),d=dw._get();ov.remove();if(i===null){cb(null);return}const q=i*4+(d??0);cb(Math.max(load=='Zavorra'?0:2,q))}},'Conferma'))));
 document.body.append(ov)
 }
-const edKg=(e,x)=>wkg('Carico (kg)',x.kg??sug(e,x),v=>{if(e.method=='lin')e.sets.forEach(s=>s.kg=v);else x.kg=v;save();R()},e.load);
+const edKg=(e,x)=>wkg('Carico (kg)',x.kg,v=>{if(e.method=='lin')e.sets.forEach(s=>s.kg=v);else x.kg=v;save();R()},e.load);
 const edRp=(e,x)=>wheel('Ripetizioni',[{items:RP,val:x.reps}],v=>{x.reps=v[0];save();R()});
 function card(s,e,i){const af=()=>{rs(e);save();R()},top=e.method=='top';
 const kgCell=(x,k)=>h('div',{class:'row',style:'gap:6px'},h('span',{class:'mu',style:'width:16px'},k+1),h('button',{class:'b o sp',onclick:()=>edKg(e,x)},h('b',{},fmt(x.kg)+' kg'),sug(e,x)!=null&&h('div',{class:'mu',style:'font-size:12px;font-weight:400'},'teor. '+fmt(sug(e,x))+(eff(e,x)==null?'':' · '+pc(eff(e,x))))),h('span',{class:'mu'},'×'),h('button',{class:'b o',style:'min-width:84px',onclick:()=>edRp(e,x)},x.reps??'—'));
