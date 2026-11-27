@@ -130,7 +130,7 @@ w.addEventListener('scroll',()=>{const n=g();hl(n)});w._n=n=>{w.scrollTop=n*40;h
 const dw=mk(D,sd),iw=mk(I,si);
 iw.addEventListener('scroll',()=>{if(iw._g()==1&&dw._g()<2)dw._n(2)}); // intero 0 -> decimale minimo 0,50 (indice 2, dopo '—' e '00')
 ov.append(h('div',{class:'sh'},h('h2',{},t),h('div',{class:'ws'},h('div',{class:'band'}),iw,h('div',{class:'wi',style:'display:flex;align-items:center;justify-content:center;pointer-events:none'},','),dw),
-h('div',{class:'r'},h('button',{class:'b sp',onclick:()=>ov.remove()},'Annulla'),h('button',{class:'b a sp',onclick:()=>{ov.remove();const i=iw._g(),d=dw._g();if(i==0||d==0){cb(null);return}let q=I[i].v*4+D[d].v;if(I[i].v==0)q=Math.max(q,2);cb(q)}},'Conferma'))));
+h('div',{class:'r'},h('button',{class:'b sp',onclick:()=>ov.remove()},'Annulla'),h('button',{class:'b a sp',onclick:()=>{ov.remove();const i=iw._g(),d=dw._g();if(i==0&&d==0){cb(null);return}let q=(I[i].v??0)*4+(D[d].v??0);q=Math.max(q,2);cb(q)}},'Conferma'))));
 document.body.append(ov);requestAnimationFrame(()=>{iw._n(si);dw._n(sd)})}
 const edKg=(e,x)=>wkg('Carico (kg)',x.kg??sug(e,x),v=>{if(e.method=='lin')e.sets.forEach(s=>s.kg=v);else x.kg=v;save();R()});
 const edRp=(e,x)=>wheel('Ripetizioni',[{items:RP,val:x.reps}],v=>{x.reps=v[0];save();R()});
