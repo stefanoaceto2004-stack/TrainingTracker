@@ -122,15 +122,58 @@ S.settings.timer&&timer(),
 s&&h('div',{class:'c'},h('div',{class:'r pad'},h('h2',{class:'sp'},s.name),pl(s,c)),s.ex.map(e=>h('div',{class:'row'},h('span',{class:'sp'},e.name),h('span',{class:'mu'},e.n+' serie'))),h('div',{class:'r pad',style:'border-top:1px solid var(--ln)'},h('button',{class:'b a sp',onclick:()=>openS(c,s)},t=='Da iniziare'?'Inizia':t=='Da continuare'?'Continua':'Modifica'),t=='Completato'&&h('button',{class:'b',onclick:()=>ask('Svuotare questo allenamento?',()=>{clr(s);save();R()})},'Svuota'))),
 c&&h('div',{class:'c'},h('h2',{},c.title),c.sessions.map(x=>h('button',{class:'row'+(x==s?' sel':''),onclick:()=>{V.sel=x.id;R()}},h('span',{class:'sp'},x.name),pl(x,c))),h('div',{class:'pad',style:'border-top:1px solid var(--ln)'},h('button',{class:'b s',onclick:()=>ask('Avviare un nuovo ciclo settimanale con la scheda attiva?',()=>{newCycle(act());V.sel=null;save();R()})},'Nuovo ciclo'))))}
 function wkg(t,val,cb,load){
-const ov=h('div',{class:'ov',onclick:e=>e.target==ov&&ov.remove()}),D=[{l:'—',v:null},{l:'00',v:0},{l:'25',v:1},{l:'50',v:2},{l:'75',v:3}],I=[{l:'—',v:null},...it(0,200).map(v=>({l:String(v).padStart(2,'0'),v}))];
-let dv=val==null?null:val%4,iv=val==null?null:Math.floor(val/4),sd=dv==null?0:D.findIndex(d=>d.v==dv),si=iv==null?0:iv+1;
-const mk=items=>{const w=h('div',{class:'wh'},h('div',{class:'pd'}),items.map(i=>h('div',{class:'wi'},i.l)),h('div',{class:'pd'}));const g=()=>Math.max(0,Math.min(items.length-1,Math.round(w.scrollTop/40))),hl=n=>[...w.children].forEach((c,k)=>c.classList.toggle('on',k-1==n));w.addEventListener('scroll',()=>hl(g()));w._n=n=>{w.scrollTop=n*40;hl(n)};w._g=g;return w};
-const dw=mk(D),iw=mk(I);
-const sync=(src)=>{let ni=iw._g(),nd=dw._g();if(src=='i'){si=ni;if(si==0)nd=0;else if(si==1){if(load=='Peso')nd=3;else if(nd==0)nd=1;else if(nd==2||nd==4)nd=3}else if(nd==0)nd=1}else{sd=nd;if(sd>0&&ni==0)ni=1;if(ni==1){if(load=='Peso')nd=3;else if(nd!=1&&nd!=3)nd=3}else if(ni>1&&nd==0)nd=1;si=ni}if(si!=iw._g()){iw._n(si)}if(nd!=dw._g()){dw._n(nd)}si=iw._g();sd=dw._g()};
-iw.addEventListener('scroll',()=>sync('i'));
-dw.addEventListener('scroll',()=>sync('d'));
-ov.append(h('div',{class:'sh'},h('h2',{},t),h('div',{class:'ws'},h('div',{class:'band'}),iw,h('div',{class:'wi',style:'display:flex;align-items:center;justify-content:center;pointer-events:none'},','),dw),h('div',{class:'r'},h('button',{class:'b sp',onclick:()=>ov.remove()},'Annulla'),h('button',{class:'b a sp',onclick:()=>{ov.remove();const i=iw._g(),d=dw._g();if(i==0){cb(null);return}let q=I[i].v*4+(D[d].v??0);cb(Math.max(load=='Zavorra'?0:2,q))}},'Conferma'))));
-document.body.append(ov);requestAnimationFrame(()=>{iw._n(si);dw._n(sd)})
+const ov=h('div',{class:'ov',onclick:e=>e.target==ov&&ov.remove()}),D=[{l:'—',v:null},{l:'00',v:0},{l:'25',v:1},{l:'50',v:2},{l:'75',v:3}],I=[{l:'—',v:null},...it(0,200)];
+let iv=val==null?null:Math.floor(val/4),dv=val==null?null:val%4;
+const valid=(i)=>i===null?D:i===0?(load=='Peso'?[D[3]]:[D[1],D[3]]):D.slice(1);
+let iw,dw;
+const mk=(items,value)=>{
+const w=h('div',{class:'wh'},h('div',{class:'pd'}),h('div'),h('div',{class:'pd'}));
+let data=items,timer=null;
+const index=()=>Math.max(0,Math.min(data.length-1,Math.round(w.scrollTop/40)));
+const sync=()=>{const n=index();[...w.children[1].children].forEach((c,k)=>c.classList.toggle('on',k===n))};
+const set=(list,v)=>{
+data=list;
+w.children[1].replaceChildren(...data.map(x=>h('div',{class:'wi'},x.l)));
+clearTimeout(timer);
+w._mute=true;
+w.scrollTop=Math.max(0,data.findIndex(x=>x.v===v))*40;
+sync();
+setTimeout(()=>w._mute=false,100)
+};
+w.addEventListener('scroll',()=>{
+sync();
+if(w._mute)return;
+clearTimeout(timer);
+timer=setTimeout(()=>settle(w),160)
+});
+w._get=()=>data[index()].v;
+w._set=set;
+set(items,value);
+return w
+};
+const settle=src=>{
+let i=iw._get(),d=dw._get();
+if(src===iw){
+if(i===null){dw._set(D,null)}
+else if(i===0){
+const opts=valid(0),v=opts.some(x=>x.v===d)?d:(load=='Peso'?2:0);
+dw._set(opts,v)
+}else{
+const opts=valid(i),v=opts.some(x=>x.v===d)?d:(d===null?0:0);
+dw._set(opts,v)
+}
+}else{
+if(d!==null&&i===null){i=0;iw._set(I,0)}
+if(i===0){
+const opts=valid(0),v=opts.some(x=>x.v===d)?d:(load=='Peso'?2:0);
+dw._set(opts,v)
+}else if(i!==null&&d===null){dw._set(valid(i),0)}
+}
+};
+iw=mk(I,iv);
+dw=mk(valid(iv),dv);
+ov.append(h('div',{class:'sh'},h('h2',{},t),h('div',{class:'ws'},h('div',{class:'band'}),iw,h('div',{class:'wi',style:'display:flex;align-items:center;justify-content:center;pointer-events:none'},','),dw),h('div',{class:'r'},h('button',{class:'b sp',onclick:()=>ov.remove()},'Annulla'),h('button',{class:'b a sp',onclick:()=>{const i=iw._get(),d=dw._get();ov.remove();if(i===null){cb(null);return}const q=i*4+(d??0);cb(Math.max(load=='Zavorra'?0:2,q))}},'Conferma'))));
+document.body.append(ov)
 }
 const edKg=(e,x)=>wkg('Carico (kg)',x.kg??sug(e,x),v=>{if(e.method=='lin')e.sets.forEach(s=>s.kg=v);else x.kg=v;save();R()},e.load);
 const edRp=(e,x)=>wheel('Ripetizioni',[{items:RP,val:x.reps}],v=>{x.reps=v[0];save();R()});
