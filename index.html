@@ -124,7 +124,7 @@ c&&h('div',{class:'c'},h('h2',{},c.title),c.sessions.map(x=>h('button',{class:'r
 function wkg(t,val,cb,load){
 const ov=h('div',{class:'ov',onclick:e=>e.target==ov&&ov.remove()}),D=[{l:'—',v:null},{l:'00',v:0},{l:'25',v:1},{l:'50',v:2},{l:'75',v:3}],I=[{l:'—',v:null},...it(0,200)];
 let iv=val==null?null:Math.floor(val/4),dv=val==null?null:val%4;
-const valid=(i)=>i===null?D:i===0?(load=='Peso'?[D[3]]:[D[1],D[3]]):D.slice(1);
+const valid=(i)=>i===null?[D[0]]:i===0?(load=='Peso'?[D[3]]:[D[1],D[3]]):D.slice(1);
 let iw,dw;
 const mk=(items,value)=>{
 const w=h('div',{class:'wh'},h('div',{class:'pd'}),h('div'),h('div',{class:'pd'}));
@@ -154,7 +154,7 @@ return w
 const settle=src=>{
 let i=iw._get(),d=dw._get();
 if(src===iw){
-if(i===null){dw._set(D,null)}
+if(i===null){dw._set(valid(null),null)}
 else if(i===0){
 const opts=valid(0),v=opts.some(x=>x.v===d)?d:(load=='Peso'?2:0);
 dw._set(opts,v)
@@ -163,11 +163,11 @@ const opts=valid(i),v=opts.some(x=>x.v===d)?d:(d===null?0:0);
 dw._set(opts,v)
 }
 }else{
-if(d!==null&&i===null){i=0;iw._set(I,0)}
+if(i===null){dw._set(valid(null),null);return}
 if(i===0){
 const opts=valid(0),v=opts.some(x=>x.v===d)?d:(load=='Peso'?2:0);
 dw._set(opts,v)
-}else if(i!==null&&d===null){dw._set(valid(i),0)}
+}else if(d===null){dw._set(valid(i),0)}
 }
 };
 iw=mk(I,iv);
